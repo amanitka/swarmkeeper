@@ -38,5 +38,4 @@ scheduler.start()
 atexit.register(close_scheduler)
 
 if __name__ == '__main__':
-    port: int = config.getint("DEFAULT", "api_port")
-    app.run(host="localhost", port=port, debug=False, threaded=True)
+    app.run(host="localhost", port=5090, debug=False, threaded=True)

@@ -20,4 +20,6 @@ ENV PATH="/home/worker/.local/bin:${PATH}"
 
 COPY --chown=worker:worker . .
 
+EXPOSE 5090
+
 ENTRYPOINT ["sh", "docker-entrypoint.sh"]
