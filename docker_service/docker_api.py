@@ -1,6 +1,6 @@
 import docker
 import logging
-from config import config
+from config.config import config
 
 
 class DockerApi:
@@ -15,7 +15,7 @@ class DockerApi:
         return image_registry_data.id
 
     def get_service_list(self, service_id_set: set) -> dict:
-        logging.debug("Retrieve service list")
+        logging.debug("Retrieve docker_service list")
         service_dict: dict = {}
         for service in self.__client.services.list():
             if service.id in service_id_set:

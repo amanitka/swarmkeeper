@@ -4,9 +4,9 @@ from apscheduler.triggers.cron import CronTrigger
 from flask import Flask
 import logging
 from apscheduler.schedulers.background import BackgroundScheduler
-from report_data_api import report_data_api
+from rest.report_data import report_data
 from extensions import docker_service_maintenance
-from config import config
+from config.config import config
 
 # Initiate logging
 log_formatter = logging.Formatter("%(asctime)s [%(threadName)s] [%(levelname)s]  %(message)s")
@@ -18,7 +18,7 @@ logging.getLogger("werkzeug").setLevel(logging.ERROR)
 logging.getLogger('apscheduler.executors.default').propagate = False
 
 app = Flask(__name__)
-app.register_blueprint(report_data_api)
+app.register_blueprint(report_data)
 
 
 def close_scheduler():
@@ -38,4 +38,5 @@ scheduler.start()
 atexit.register(close_scheduler)
 
 if __name__ == '__main__':
-    app.run(host="localhost", port=8090, debug=False, threaded=True)
+    port: int = config.getint("DEFAULT", "api_port")
+    app.run(host="localhost", port=port, debug=False, threaded=True)

@@ -1,13 +1,16 @@
 from queue import Queue
 import logging
-from docker_api import DockerApi
+from docker_service.docker_api import DockerApi
+from config.config import config
 
 
 class DockerServiceMaintenance:
 
     def __init__(self, docker_api: DockerApi, task_queue: Queue):
-        self.__docker_api = docker_api
-        self.__task_queue = task_queue
+        self.__docker_api: DockerApi = docker_api
+        self.__task_queue: Queue = task_queue
+        self.__service_ignore_list: list = config.get("DEFAULT", "service_ignore_list").split(" ")
+        self.__namespace_ignore_list: list = config.get("DEFAULT", "namespace_ignore_list").split(" ")
 
     @staticmethod
     def __get_distinct_value_list(dictionary_list: list[dict], key) -> set:
@@ -29,7 +32,12 @@ class DockerServiceMaintenance:
         service_dict = self.__docker_api.get_service_list(service_id_list)
         for container in container_list:
             if container["id_service"]:
-                self.__process_service_container(container, service_dict)
+                if self.__service_ignore_list and container["service_name"] in self.__service_ignore_list:
+                    logging.info(f"Skip processing of container {container['name']}, because it belongs to ignored service {container['service_name']}")
+                elif self.__namespace_ignore_list and container["stack_namespace"] in self.__namespace_ignore_list:
+                    logging.info(f"Skip processing of container {container['name']}, because it belongs to ignored namespace {container['stack_namespace']}")
+                else:
+                    self.__process_service_container(container, service_dict)
 
     def process_queue(self):
         if self.__task_queue.qsize() > 0:
