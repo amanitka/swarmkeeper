@@ -10,7 +10,7 @@ class DockerApi:
         logging.info(f"Initialize docker client with base url: {docker_base_url}")
         self.__client = docker.DockerClient(base_url=docker_base_url)
 
-    def __get_image_registry_data(self, image_tag: str) -> str:
+    def get_image_digest_registry(self, image_tag: str) -> str:
         image_registry_data = self.__client.images.get_registry_data(image_tag)
         return image_registry_data.id
 
@@ -21,8 +21,7 @@ class DockerApi:
             if service.id in service_id_set:
                 image_tag: str = service.attrs.get("Spec")["Labels"]["com.docker.stack.image"]
                 service_dict[service.id] = {"service_name": service.name,
-                                            "image_tag": image_tag,
-                                            "image_digest_repo": self.__get_image_registry_data(image_tag)}
+                                            "image_tag": image_tag}
         return service_dict
 
     def update_service_force(self, id_service: str):
