@@ -6,7 +6,7 @@ Swarmkeeper Agent periodically reports container status to Swarmkeeper. Base on 
 
 If enabled Swarmkeeper Agent also can clean up stopped containers and unused images.
 
-#### Example of usage
+## Usage
 ```
 version: "3.8"
 
@@ -43,7 +43,6 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - TZ=${TIMEZONE} 
-      - "NAMESPACE_IGNORE_LIST=proxy mon"
     networks:
       - mon_network
     deploy:
@@ -51,5 +50,23 @@ services:
       replicas: 1
       placement:
         constraints: 
-          - node.role == manager  
+          - node.role == manager
+          - node.platform.os == linux
 ```
+
+## Configuration
+### Swarmkeeper
+Environment variables:
+- `DOCKER_BASE_URL` - by default it is using docker sock *unix://var/run/docker.sock*, but it can be overwritten to use SSH or TCP access to docker
+- `SERVICE_IGNORE_LIST` - list of docker service divided by space which should be ignored, for example *"SERVICE_IGNORE_LIST=service1 service2"*
+
+Labels
+
+### Swarmkeeper Agent
+Environment variables:
+- `DOCKER_BASE_URL` - by default it is using docker sock *unix://var/run/docker.sock*, but it can be overwritten to use SSH or TCP access to docker
+- `SWARMKEEPER_URL` -
+- `REPORT_CRON_SCHEDULE` -
+- `CLEANUP_CRON_SCHEDULE` -
+- `CONTAINER_CLEANUP` -
+- `IMAGE_CLEANUP` -
