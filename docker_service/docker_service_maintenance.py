@@ -11,10 +11,6 @@ class DockerServiceMaintenance:
         self.__task_queue: Queue = task_queue
         self.__service_ignore_list: list = config.get("DEFAULT", "service_ignore_list").split(" ")
 
-    @staticmethod
-    def __get_distinct_value_list(dictionary_list: list[dict], key) -> set:
-        return {dictionary[key] for dictionary in dictionary_list if key in dictionary and dictionary[key]}
-
     def __can_process_service_container(self, container: dict, service: dict) -> bool:
         if service["process_flag"] == "N":
             logging.info(f"Skip processing of container {container['name']} [Service {container['service_name']}], because it was disabled by service label")
@@ -37,15 +33,13 @@ class DockerServiceMaintenance:
                 else:
                     logging.error(f"Update of service {service['service_name']} failed!")
 
-    def __process_container_list(self, container_list: list[dict]):
-        service_id_list = self.__get_distinct_value_list(container_list, "id_service")
-        service_dict = self.__docker_api.get_service_list(service_id_list)
-        for container in container_list:
-            if container["id_service"]:
-                self.__process_service_container(container, service_dict[container["id_service"]])
+    def __process_service_container_list(self, service_container_list: list[dict]):
+        service_dict = self.__docker_api.get_service_list()
+        for service_container in service_container_list:
+            self.__process_service_container(service_container, service_dict[service_container["id_service"]])
 
     def process_queue(self):
         if self.__task_queue.qsize() > 0:
             logging.info(f"Processing queue. Queue size: {self.__task_queue.qsize()}")
-            self.__process_container_list(self.__task_queue.get())
+            self.__process_service_container_list(self.__task_queue.get())
             self.__task_queue.task_done()
